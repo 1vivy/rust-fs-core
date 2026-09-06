@@ -9,6 +9,20 @@ reaches all of them.
 
 ## [Unreleased]
 
+## [0.2.10] — 2026-09-06
+
+### Changed
+
+- `FileDevice` reads are positioned, and no longer take a lock. A read
+  was `seek` then `read` under one mutex, so the file's cursor was
+  shared state and two threads reading different offsets took turns —
+  not because the device could not serve them at once, but because one
+  would have moved the other's cursor. Unix uses `pread`, which takes
+  the offset as an argument, so readers genuinely overlap. Windows keeps
+  the lock, because its `seek_read` does move the file pointer. Writes
+  keep it on both, since a write is still seek-then-write and a partial
+  one must not have another writer's seek land inside it.
+
 ## [0.2.9] — 2026-09-06
 
 ### Fixed

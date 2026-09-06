@@ -4,12 +4,35 @@
 use crate::block::{BlockDevice, BlockRead};
 use crate::error::{Error, Result};
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Seek, SeekFrom, Write};
+use std::io::{Seek, SeekFrom, Write};
 use std::path::Path;
 use std::sync::Mutex;
 
+/// A file opened as a block device.
+///
+/// # Reads do not take the lock; writes do
+///
+/// A read was `seek` then `read` under a mutex, which made the file's
+/// cursor shared state: two threads reading different offsets had to
+/// take turns, not because the device could not serve them at once but
+/// because one would have moved the other's cursor.
+///
+/// On Unix the cursor is not involved at all — `pread` takes the offset
+/// as an argument — so reads run without the lock and genuinely overlap.
+///
+/// On Windows the equivalent (`seek_read`) *does* move the file
+/// pointer, so the lock stays there. Same behaviour, one platform
+/// paying for it.
+///
+/// Writes keep the lock on both, because `write_at` is still `seek` plus
+/// `write_all` and a partial write must not have another writer's seek
+/// land in the middle of it.
 pub struct FileDevice {
-    file: Mutex<File>,
+    file: File,
+    /// Held for writes only — see the type's own note. `()` rather than
+    /// the file, so that a reader physically cannot be made to wait on
+    /// it by a later edit.
+    write_lock: Mutex<()>,
     size: u64,
     writable: bool,
 }
@@ -20,7 +43,8 @@ impl FileDevice {
         let file = File::open(path)?;
         let size = file.metadata()?.len();
         Ok(Self {
-            file: Mutex::new(file),
+            file,
+            write_lock: Mutex::new(()),
             size,
             writable: false,
         })
@@ -31,7 +55,8 @@ impl FileDevice {
         let file = OpenOptions::new().read(true).write(true).open(path)?;
         let size = file.metadata()?.len();
         Ok(Self {
-            file: Mutex::new(file),
+            file,
+            write_lock: Mutex::new(()),
             size,
             writable: true,
         })
@@ -47,22 +72,44 @@ impl FileDevice {
     }
 }
 
+impl FileDevice {
+    /// One positioned read, returning what it got.
+    ///
+    /// Unix: `pread`, which does not touch the file cursor, so this
+    /// needs no lock and concurrent readers overlap.
+    #[cfg(unix)]
+    fn read_once(&self, offset: u64, buf: &mut [u8]) -> Result<usize> {
+        use std::os::unix::fs::FileExt;
+        Ok(self.file.read_at(buf, offset)?)
+    }
+
+    /// Windows: `seek_read` DOES move the file pointer, so the lock is
+    /// still required here. The interface is the same and only this
+    /// platform pays.
+    #[cfg(windows)]
+    fn read_once(&self, offset: u64, buf: &mut [u8]) -> Result<usize> {
+        use std::os::windows::fs::FileExt;
+        let _guard = self.write_lock.lock().unwrap();
+        Ok(self.file.seek_read(buf, offset)?)
+    }
+}
+
 impl BlockRead for FileDevice {
     fn read_at(&self, offset: u64, buf: &mut [u8]) -> Result<()> {
-        let mut f = self.file.lock().unwrap();
-        f.seek(SeekFrom::Start(offset))?;
+        // A SHORT READ IS AN ERROR NAMING WHAT WAS ASKED FOR AND WHAT
+        // ARRIVED, not a smaller answer: a caller that asked for a block
+        // and got half of one cannot tell the difference from bytes.
         let mut total = 0usize;
         while total < buf.len() {
-            match f.read(&mut buf[total..])? {
-                0 => {
-                    return Err(Error::ShortRead {
-                        offset,
-                        want: buf.len(),
-                        got: total,
-                    });
-                }
-                n => total += n,
+            let n = self.read_once(offset + total as u64, &mut buf[total..])?;
+            if n == 0 {
+                return Err(Error::ShortRead {
+                    offset,
+                    want: buf.len(),
+                    got: total,
+                });
             }
+            total += n;
         }
         Ok(())
     }
@@ -77,7 +124,8 @@ impl BlockDevice for FileDevice {
         if !self.writable {
             return Err(Error::ReadOnly);
         }
-        let mut f = self.file.lock().unwrap();
+        let _guard = self.write_lock.lock().unwrap();
+        let mut f = &self.file;
         f.seek(SeekFrom::Start(offset))?;
         f.write_all(buf)?;
         Ok(())
@@ -87,9 +135,10 @@ impl BlockDevice for FileDevice {
         if !self.writable {
             return Ok(());
         }
-        let mut f = self.file.lock().unwrap();
+        let _guard = self.write_lock.lock().unwrap();
+        let mut f = &self.file;
         f.flush()?;
-        f.sync_data()?;
+        self.file.sync_data()?;
         Ok(())
     }
 
@@ -101,6 +150,56 @@ impl BlockDevice for FileDevice {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Concurrent readers do not serialise, and none of them sees
+    /// another's offset.
+    ///
+    /// THE BUG THIS REPLACES: reads were `seek` then `read` under one
+    /// mutex, so the file cursor was shared state. Two threads reading
+    /// different parts of the same image took turns for no reason the
+    /// device imposed. Worse, the shape was one edit away from being
+    /// wrong rather than merely slow -- drop the lock without moving to
+    /// positioned reads and every reader corrupts every other reader's
+    /// offset.
+    ///
+    /// The assertion is on the BYTES rather than on timing: a test that
+    /// measured overlap would be a flake on a loaded machine, while a
+    /// reader that got another's offset returns the wrong bytes every
+    /// time.
+    #[test]
+    fn many_threads_reading_different_offsets_each_get_their_own_bytes() {
+        let path = temp_path("parallel_reads");
+        let _c = Cleanup(path.clone());
+        // Each 256-byte page filled with its own page number, so a read
+        // that landed at the wrong offset is obvious from one byte.
+        let mut bytes = Vec::with_capacity(64 * 256);
+        for page in 0..64u8 {
+            bytes.extend(std::iter::repeat_n(page, 256));
+        }
+        std::fs::write(&path, &bytes).expect("write the image");
+
+        let dev = std::sync::Arc::new(FileDevice::open(&path).expect("open"));
+        let mut handles = Vec::new();
+        for page in 0..64u8 {
+            let dev = dev.clone();
+            handles.push(std::thread::spawn(move || {
+                // Several times each, so a thread that raced would have
+                // many chances to read somebody else's page.
+                for _ in 0..50 {
+                    let mut buf = [0u8; 256];
+                    dev.read_at(u64::from(page) * 256, &mut buf).expect("read");
+                    assert!(
+                        buf.iter().all(|b| *b == page),
+                        "page {page} came back holding another page's bytes"
+                    );
+                }
+            }));
+        }
+        for h in handles {
+            h.join().expect("a reader panicked");
+        }
+    }
+
     use std::sync::atomic::{AtomicU64, Ordering};
 
     /// Unique temp path under the system temp dir (no extra dev-deps).
