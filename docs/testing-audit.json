@@ -1,0 +1,2913 @@
+{
+  "schemaVersion": 1,
+  "repository": "rust-fs-core",
+  "baselineCommit": "048f7ba9496b78844dd394d6c6ad6bf027fde4bd",
+  "consumedRevision": "e6e891a0828fcd80d1c77f52b9ce1f447b8d1a1e",
+  "upstreamComparison": "f392d68c98c3fea01a35883ecb2e522c3d9857ed",
+  "counting": "Each declared test and explicit subcase is listed; Rustdoc snippets and manual qualification cases are identified separately. Target-gated tests remain listed even when they cannot run on this host. Data fixtures/support scripts and historical reports are not test cases.",
+  "entries": [
+    {
+      "source": {
+        "name": "a_read_only_device_can_be_cached",
+        "path": "src/caching_device.rs",
+        "line": 641
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read only device can be cached.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_smaller_than_a_block_is_served_from_it",
+        "path": "src/caching_device.rs",
+        "line": 662
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read smaller than a block is served from it.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_spanning_two_blocks_is_stitched",
+        "path": "src/caching_device.rs",
+        "line": 685
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read spanning two blocks is stitched.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_that_would_sweep_the_cache_passes_through",
+        "path": "src/caching_device.rs",
+        "line": 706
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read that would sweep the cache passes through.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_device_shorter_than_a_block_still_reads",
+        "path": "src/caching_device.rs",
+        "line": 726
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a device shorter than a block still reads.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_past_the_end_is_still_an_error",
+        "path": "src/caching_device.rs",
+        "line": 750
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read past the end is still an error.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_bypassed_read_does_not_wait_for_the_cache_lock",
+        "path": "src/caching_device.rs",
+        "line": 770
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a bypassed read does not wait for the cache lock.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "writing_through_a_read_only_cache_is_refused",
+        "path": "src/caching_device.rs",
+        "line": 811
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: writing through a read only cache is refused.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "it_counts_calls_and_the_bytes_they_asked_for",
+        "path": "src/counting_device.rs",
+        "line": 136
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: it counts calls and the bytes they asked for.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_failed_read_still_counts",
+        "path": "src/counting_device.rs",
+        "line": 158
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a failed read still counts.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "bytes_counts_what_was_asked_for_including_a_failed_read",
+        "path": "src/counting_device.rs",
+        "line": 181
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: bytes counts what was asked for including a failed read.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "bytes_is_the_request_even_when_the_device_moved_a_prefix",
+        "path": "src/counting_device.rs",
+        "line": 211
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: bytes is the request even when the device moved a prefix.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "resetting_starts_the_measurement_where_the_work_does",
+        "path": "src/counting_device.rs",
+        "line": 254
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: resetting starts the measurement where the work does.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_caught_panic_reports_what_it_said",
+        "path": "src/ffi.rs",
+        "line": 606
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a caught panic reports what it said.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_read_close_round_trip",
+        "path": "src/ffi.rs",
+        "line": 645
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open read close round trip.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "null_args_return_null_arg",
+        "path": "src/ffi.rs",
+        "line": 670
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: null args return null arg.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "last_error_populated_on_open_failure",
+        "path": "src/ffi.rs",
+        "line": 679
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: last error populated on open failure.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "callback_device_round_trip_rw",
+        "path": "src/ffi.rs",
+        "line": 733
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: callback device round trip rw.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "callback_device_readonly_when_write_null",
+        "path": "src/ffi.rs",
+        "line": 781
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: callback device readonly when write null.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "callback_device_null_cfg_returns_null",
+        "path": "src/ffi.rs",
+        "line": 809
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: callback device null cfg returns null.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_panic_computing_the_size_is_reported_not_just_swallowed",
+        "path": "src/ffi.rs",
+        "line": 868
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a panic computing the size is reported not just swallowed.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_panic_probing_writability_is_reported",
+        "path": "src/ffi.rs",
+        "line": 884
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a panic probing writability is reported.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_successful_call_clears_the_previous_error",
+        "path": "src/ffi.rs",
+        "line": 899
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a successful call clears the previous error.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "the_header_and_the_rust_enum_publish_the_same_error_codes",
+        "path": "src/ffi.rs",
+        "line": 1073
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: the header and the rust enum publish the same error codes.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "the_error_codes_still_have_the_numbers_they_were_published_with",
+        "path": "src/ffi.rs",
+        "line": 1097
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: the error codes still have the numbers they were published with.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "many_threads_reading_different_offsets_each_get_their_own_bytes",
+        "path": "src/file_device.rs",
+        "line": 169
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: many threads reading different offsets each get their own bytes.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_rw_round_trips_write_then_read",
+        "path": "src/file_device.rs",
+        "line": 220
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open rw round trips write then read.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_rw_errors_on_missing_path",
+        "path": "src/file_device.rs",
+        "line": 238
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open rw errors on missing path.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_best_effort_uses_rw_when_writable",
+        "path": "src/file_device.rs",
+        "line": 244
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open best effort uses rw when writable.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_best_effort_falls_back_to_read_only",
+        "path": "src/file_device.rs",
+        "line": 255
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open best effort falls back to read only.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_through_works",
+        "path": "src/readonly.rs",
+        "line": 60
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read through works.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "writes_rejected_even_though_inner_is_writable",
+        "path": "src/readonly.rs",
+        "line": 71
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: writes rejected even though inner is writable.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "into_inner_returns_unchanged",
+        "path": "src/readonly.rs",
+        "line": 82
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: into inner returns unchanged.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "inner_borrows_without_consuming",
+        "path": "src/readonly.rs",
+        "line": 96
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: inner borrows without consuming.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_reader_rebases_offsets",
+        "path": "src/slice.rs",
+        "line": 363
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice reader rebases offsets.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_slice_whose_start_plus_offset_leaves_the_parent_reads_nothing",
+        "path": "src/slice.rs",
+        "line": 393
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a slice whose start plus offset leaves the parent reads nothing.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_reader_rejects_out_of_bounds",
+        "path": "src/slice.rs",
+        "line": 420
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice reader rejects out of bounds.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_slice_works_through_arc",
+        "path": "src/slice.rs",
+        "line": 431
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned slice works through arc.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slices_reject_writes_via_blockdevice_default",
+        "path": "src/slice.rs",
+        "line": 444
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slices reject writes via blockdevice default.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_slice_accessors_report_geometry",
+        "path": "src/slice.rs",
+        "line": 452
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned slice accessors report geometry.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_accessors_report_geometry",
+        "path": "src/slice.rs",
+        "line": 461
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice accessors report geometry.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_rebases_reads_and_writes",
+        "path": "src/slice.rs",
+        "line": 471
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice rebases reads and writes.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_rejects_out_of_bounds_write",
+        "path": "src/slice.rs",
+        "line": 488
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice rejects out of bounds write.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "same_out_of_range_span_is_short_read_for_a_read_and_out_of_bounds_for_a_write",
+        "path": "src/slice.rs",
+        "line": 502
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: same out of range span is short read for a read and out of bounds for a write.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "window_on_parent_clamps_the_length_and_refuses_only_a_start_past_the_end",
+        "path": "src/slice.rs",
+        "line": 526
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: window on parent clamps the length and refuses only a start past the end.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_borrowed_slice_cannot_claim_more_than_its_parent_holds",
+        "path": "src/slice.rs",
+        "line": 567
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a borrowed slice cannot claim more than its parent holds.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "an_owned_slice_cannot_claim_more_than_its_parent_holds",
+        "path": "src/slice.rs",
+        "line": 592
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: an owned slice cannot claim more than its parent holds.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "an_rw_slice_refuses_a_write_past_its_parents_end_as_out_of_bounds",
+        "path": "src/slice.rs",
+        "line": 621
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: an rw slice refuses a write past its parents end as out of bounds.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_slice_starting_past_its_parents_end_is_empty",
+        "path": "src/slice.rs",
+        "line": 645
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a slice starting past its parents end is empty.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_flush_delegates_to_parent",
+        "path": "src/slice.rs",
+        "line": 664
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice flush delegates to parent.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_to_end_returns_full_contents",
+        "path": "src/stream.rs",
+        "line": 162
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read to end returns full contents.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "partial_end_read_is_clamped_not_errored",
+        "path": "src/stream.rs",
+        "line": 173
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: partial end read is clamped not errored.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_at_eof_returns_zero",
+        "path": "src/stream.rs",
+        "line": 183
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read at eof returns zero.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_past_eof_position_returns_zero",
+        "path": "src/stream.rs",
+        "line": 192
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read past eof position returns zero.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "zero_length_buf_returns_zero",
+        "path": "src/stream.rs",
+        "line": 199
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: zero length buf returns zero.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "position_advances_after_read",
+        "path": "src/stream.rs",
+        "line": 207
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: position advances after read.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_start_jumps_absolute",
+        "path": "src/stream.rs",
+        "line": 220
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek start jumps absolute.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_end_jumps_relative_to_size",
+        "path": "src/stream.rs",
+        "line": 231
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek end jumps relative to size.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_current_jumps_relative_to_cursor",
+        "path": "src/stream.rs",
+        "line": 241
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek current jumps relative to cursor.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_past_end_is_allowed_then_read_returns_zero",
+        "path": "src/stream.rs",
+        "line": 250
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek past end is allowed then read returns zero.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_before_zero_is_invalid_input",
+        "path": "src/stream.rs",
+        "line": 258
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek before zero is invalid input.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "works_through_arc_dyn_blockread",
+        "path": "src/stream.rs",
+        "line": 268
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: works through arc dyn blockread.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "works_through_borrowed_reference",
+        "path": "src/stream.rs",
+        "line": 277
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: works through borrowed reference.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "into_inner_returns_wrapped_device",
+        "path": "src/stream.rs",
+        "line": 290
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: into inner returns wrapped device.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "get_ref_exposes_inner_without_consuming",
+        "path": "src/stream.rs",
+        "line": 297
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: get ref exposes inner without consuming.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "error_from_inner_propagates_as_io_error",
+        "path": "src/stream.rs",
+        "line": 305
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: error from inner propagates as io error.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "offset_from_handles_add_sub_and_overflow",
+        "path": "src/stream.rs",
+        "line": 315
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: offset from handles add sub and overflow.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "error_mapping_covers_every_variant",
+        "path": "src/stream.rs",
+        "line": 330
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: error mapping covers every variant.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "rustdoc example at line 12",
+        "path": "src/stream.rs",
+        "line": 12
+      },
+      "kind": "rustdoc",
+      "decision": "keep",
+      "contract": "Published Rust API usage remains compatible with the documented example.",
+      "owner": "rust-fs-core",
+      "layer": "public API compile/example",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "ignore"
+    },
+    {
+      "source": {
+        "name": "a_read_past_the_end_is_a_short_read_not_a_panic",
+        "path": "src/test_device.rs",
+        "line": 117
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read past the end is a short read not a panic.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "the_writable_one_reads_the_same_way",
+        "path": "src/test_device.rs",
+        "line": 128
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: the writable one reads the same way.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_write_past_the_end_is_refused_rather_than_growing_the_buffer",
+        "path": "src/test_device.rs",
+        "line": 136
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a write past the end is refused rather than growing the buffer.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "reads_and_writes_inside_the_buffer_round_trip",
+        "path": "src/test_device.rs",
+        "line": 143
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: reads and writes inside the buffer round trip.",
+      "owner": "rust-fs-core",
+      "layer": "library unit",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "arc_blockread_forwards_read_and_size",
+        "path": "tests/block_forwarding.rs",
+        "line": 56
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: arc blockread forwards read and size.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "arc_blockdevice_forwards_write_flush_is_writable",
+        "path": "tests/block_forwarding.rs",
+        "line": 67
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: arc blockdevice forwards write flush is writable.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "box_blockread_forwards",
+        "path": "tests/block_forwarding.rs",
+        "line": 81
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: box blockread forwards.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "box_blockdevice_forwards_write",
+        "path": "tests/block_forwarding.rs",
+        "line": 90
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: box blockdevice forwards write.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "box_blockdevice_forwards_readonly_rejection",
+        "path": "tests/block_forwarding.rs",
+        "line": 100
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: box blockdevice forwards readonly rejection.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "ref_blockread_forwards",
+        "path": "tests/block_forwarding.rs",
+        "line": 110
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: ref blockread forwards.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "arc_dyn_blockread_clones_share_state",
+        "path": "tests/block_forwarding.rs",
+        "line": 122
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: arc dyn blockread clones share state.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "file_device_ro_write_rejected",
+        "path": "tests/cache.rs",
+        "line": 21
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: file device ro write rejected.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "file_device_rw_round_trip",
+        "path": "tests/cache.rs",
+        "line": 33
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: file device rw round trip.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "callback_device_without_writer_rejects_writes",
+        "path": "tests/cache.rs",
+        "line": 46
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: callback device without writer rejects writes.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "caching_device_caches_repeated_reads",
+        "path": "tests/cache.rs",
+        "line": 105
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: caching device caches repeated reads.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_small_unaligned_read_is_served_from_its_block",
+        "path": "tests/cache.rs",
+        "line": 131
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a small unaligned read is served from its block.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_across_a_boundary_is_stitched_from_both_blocks",
+        "path": "tests/cache.rs",
+        "line": 151
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read across a boundary is stitched from both blocks.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_that_would_sweep_the_cache_bypasses_it",
+        "path": "tests/cache.rs",
+        "line": 177
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read that would sweep the cache bypasses it.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "caching_device_invalidates_on_write",
+        "path": "tests/cache.rs",
+        "line": 194
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: caching device invalidates on write.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_zero_block_size_is_refused_rather_than_divided_by",
+        "path": "tests/caching_block_size.rs",
+        "line": 51
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a zero block size is refused rather than divided by.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "an_absurd_block_size_is_refused_rather_than_allocated_for",
+        "path": "tests/caching_block_size.rs",
+        "line": 62
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: an absurd block size is refused rather than allocated for.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "an_ordinary_block_size_still_works",
+        "path": "tests/caching_block_size.rs",
+        "line": 76
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: an ordinary block size still works.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_zero_block_size_refuses_a_write_before_it_reaches_the_device",
+        "path": "tests/caching_block_size.rs",
+        "line": 148
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a zero block size refuses a write before it reaches the device.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "an_ordinary_block_size_still_writes",
+        "path": "tests/caching_block_size.rs",
+        "line": 175
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: an ordinary block size still writes.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "concurrent_misses_on_one_block_read_the_device_once_and_evict_nothing",
+        "path": "tests/caching_concurrent_miss.rs",
+        "line": 168
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: concurrent misses on one block read the device once and evict nothing.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_fetch_that_fails_releases_the_block_it_was_holding",
+        "path": "tests/caching_concurrent_miss.rs",
+        "line": 283
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a fetch that fails releases the block it was holding.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_device_that_re_enters_the_cache_reads_again_instead_of_waiting_for_itself",
+        "path": "tests/caching_concurrent_miss.rs",
+        "line": 358
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a device that re enters the cache reads again instead of waiting for itself.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_spanning_two_blocks_invalidates_both",
+        "path": "tests/caching_cross_block.rs",
+        "line": 51
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write spanning two blocks invalidates both.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_spanning_three_blocks_invalidates_all_three",
+        "path": "tests/caching_cross_block.rs",
+        "line": 75
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write spanning three blocks invalidates all three.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_entirely_outside_any_cached_block_leaves_cache_intact",
+        "path": "tests/caching_cross_block.rs",
+        "line": 103
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write entirely outside any cached block leaves cache intact.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_exactly_at_block_boundary_invalidates_only_that_block",
+        "path": "tests/caching_cross_block.rs",
+        "line": 124
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write exactly at block boundary invalidates only that block.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_touching_only_the_end_byte_of_a_block_still_invalidates",
+        "path": "tests/caching_cross_block.rs",
+        "line": 145
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write touching only the end byte of a block still invalidates.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "capacity_one_evicts_on_every_new_block",
+        "path": "tests/caching_lru.rs",
+        "line": 48
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: capacity one evicts on every new block.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "lru_evicts_least_recently_used_not_first_inserted",
+        "path": "tests/caching_lru.rs",
+        "line": 66
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: lru evicts least recently used not first inserted.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "invalidate_all_clears_cache",
+        "path": "tests/caching_lru.rs",
+        "line": 85
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: invalidate all clears cache.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_invalidates_overlapping_cache_blocks",
+        "path": "tests/caching_lru.rs",
+        "line": 105
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write invalidates overlapping cache blocks.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "non_aligned_and_partial_reads_go_through_the_cache",
+        "path": "tests/caching_lru.rs",
+        "line": 135
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: non aligned and partial reads go through the cache.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "forwards_size_bytes_and_is_writable_from_inner",
+        "path": "tests/caching_lru.rs",
+        "line": 159
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: forwards size bytes and is writable from inner.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_the_cache_could_not_fill_is_an_error_not_a_short_ok",
+        "path": "tests/caching_size_change.rs",
+        "line": 51
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read the cache could not fill is an error not a short ok.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_at_the_very_top_of_the_address_space_is_refused",
+        "path": "tests/caching_wild_offset.rs",
+        "line": 84
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read at the very top of the address space is refused.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_whose_end_wraps_past_the_top_is_refused",
+        "path": "tests/caching_wild_offset.rs",
+        "line": 107
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read whose end wraps past the top is refused.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "an_ordinary_read_consults_the_device",
+        "path": "tests/caching_wild_offset.rs",
+        "line": 131
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: an ordinary read consults the device.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_racing_a_write_does_not_leave_pre_write_bytes_in_the_cache",
+        "path": "tests/caching_write_race.rs",
+        "line": 97
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read racing a write does not leave pre write bytes in the cache.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "a_read_that_completes_inside_a_write_does_not_survive_it",
+        "path": "tests/caching_write_race.rs",
+        "line": 163
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: a read that completes inside a write does not survive it.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "with_writer_is_writable_and_dispatches_writes",
+        "path": "tests/callback_device.rs",
+        "line": 8
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: with writer is writable and dispatches writes.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "flush_callback_invoked_when_present",
+        "path": "tests/callback_device.rs",
+        "line": 36
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: flush callback invoked when present.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "flush_without_callback_is_noop_ok",
+        "path": "tests/callback_device.rs",
+        "line": 57
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: flush without callback is noop ok.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_callback_io_error_propagates_via_io_variant",
+        "path": "tests/callback_device.rs",
+        "line": 71
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read callback io error propagates via io variant.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "write_callback_io_error_propagates_via_io_variant",
+        "path": "tests/callback_device.rs",
+        "line": 87
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: write callback io error propagates via io variant.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "size_bytes_matches_declared_size",
+        "path": "tests/callback_device.rs",
+        "line": 108
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: size bytes matches declared size.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "stream_over_caching_over_file_reads_full_contents",
+        "path": "tests/composition_stacks.rs",
+        "line": 24
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: stream over caching over file reads full contents.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "re_streaming_through_cache_records_hits",
+        "path": "tests/composition_stacks.rs",
+        "line": 42
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: re streaming through cache records hits.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "rw_slice_over_caching_over_file_write_persists_to_disk",
+        "path": "tests/composition_stacks.rs",
+        "line": 72
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: rw slice over caching over file write persists to disk.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "ro_slice_over_caching_over_file_reads_window",
+        "path": "tests/composition_stacks.rs",
+        "line": 99
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: ro slice over caching over file reads window.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "stream_over_readonly_over_file_reads_match_writes_denied",
+        "path": "tests/composition_stacks.rs",
+        "line": 118
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: stream over readonly over file reads match writes denied.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "multi_slice_partition_walk_does_not_share_cache_entries_across_slices",
+        "path": "tests/composition_stacks.rs",
+        "line": 142
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: multi slice partition walk does not share cache entries across slices.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "stream_with_seek_over_caching_walks_to_arbitrary_offset",
+        "path": "tests/composition_stacks.rs",
+        "line": 169
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: stream with seek over caching walks to arbitrary offset.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "display_io_wraps_inner",
+        "path": "tests/error.rs",
+        "line": 7
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: display io wraps inner.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "display_short_read_includes_fields",
+        "path": "tests/error.rs",
+        "line": 14
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: display short read includes fields.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "display_read_only_message",
+        "path": "tests/error.rs",
+        "line": 24
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: display read only message.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "display_out_of_bounds_includes_fields",
+        "path": "tests/error.rs",
+        "line": 29
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: display out of bounds includes fields.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "display_custom_is_passthrough",
+        "path": "tests/error.rs",
+        "line": 39
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: display custom is passthrough.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "debug_formats_all_variants",
+        "path": "tests/error.rs",
+        "line": 45
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: debug formats all variants.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "source_is_some_only_for_io",
+        "path": "tests/error.rs",
+        "line": 70
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: source is some only for io.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "from_io_error_wraps_to_io_variant",
+        "path": "tests/error.rs",
+        "line": 93
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: from io error wraps to io variant.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "question_mark_operator_works_via_from",
+        "path": "tests/error.rs",
+        "line": 103
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: question mark operator works via from.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_ro_reads_rebased_window_from_parent",
+        "path": "tests/ffi_slice.rs",
+        "line": 33
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice ro reads rebased window from parent.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_ro_write_returns_read_only_even_with_writable_parent",
+        "path": "tests/ffi_slice.rs",
+        "line": 57
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice ro write returns read only even with writable parent.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_rw_write_lands_at_parent_start_plus_offset",
+        "path": "tests/ffi_slice.rs",
+        "line": 77
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice rw write lands at parent start plus offset.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_rw_write_past_length_returns_out_of_bounds",
+        "path": "tests/ffi_slice.rs",
+        "line": 110
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice rw write past length returns out of bounds.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_rw_over_readonly_parent_reports_readonly_on_write",
+        "path": "tests/ffi_slice.rs",
+        "line": 126
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice rw over readonly parent reports readonly on write.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_ro_read_past_length_returns_short_read",
+        "path": "tests/ffi_slice.rs",
+        "line": 146
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice ro read past length returns short read.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_ro_null_parent_returns_null_and_sets_last_error",
+        "path": "tests/ffi_slice.rs",
+        "line": 162
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice ro null parent returns null and sets last error.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_rw_null_parent_returns_null_and_sets_last_error",
+        "path": "tests/ffi_slice.rs",
+        "line": 174
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice rw null parent returns null and sets last error.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_survives_parent_close_via_arc_ownership",
+        "path": "tests/ffi_slice.rs",
+        "line": 184
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice survives parent close via arc ownership.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_ro_length_is_clamped_to_what_the_parent_holds",
+        "path": "tests/ffi_slice.rs",
+        "line": 222
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice ro length is clamped to what the parent holds.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_rw_length_is_clamped_and_a_write_past_it_does_not_grow_the_image",
+        "path": "tests/ffi_slice.rs",
+        "line": 260
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice rw length is clamped and a write past it does not grow the image.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_ro_starting_past_the_parent_returns_null_with_a_message",
+        "path": "tests/ffi_slice.rs",
+        "line": 292
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice ro starting past the parent returns null with a message.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_rw_starting_past_the_parent_returns_null_with_a_message",
+        "path": "tests/ffi_slice.rs",
+        "line": 314
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice rw starting past the parent returns null with a message.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "closing_null_slice_handle_is_safe_noop",
+        "path": "tests/ffi_slice.rs",
+        "line": 332
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: closing null slice handle is safe noop.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_nonexistent_returns_io_error",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 21
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open nonexistent returns io error.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_rw_nonexistent_returns_io_error",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 41
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open rw nonexistent returns io error.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "size_bytes_matches_file_length",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 55
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: size bytes matches file length.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "zero_length_read_succeeds",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 63
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: zero length read succeeds.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_exactly_at_end_zero_length_ok",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 72
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read exactly at end zero length ok.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_past_eof_returns_short_read",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 82
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read past eof returns short read.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_starting_at_eof_returns_short_read_with_zero_got",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 99
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read starting at eof returns short read with zero got.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "multi_chunk_read_walks_entire_file",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 115
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: multi chunk read walks entire file.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_ro_then_flush_is_noop",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 137
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open ro then flush is noop.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "open_best_effort_falls_back_to_readonly",
+        "path": "tests/file_device_edge_cases.rs",
+        "line": 146
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: open best effort falls back to readonly.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "wrapping_arc_dyn_blockread_works",
+        "path": "tests/readonly_wrapper.rs",
+        "line": 46
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: wrapping arc dyn blockread works.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "wrapping_arc_dyn_blockdevice_hides_writability",
+        "path": "tests/readonly_wrapper.rs",
+        "line": 57
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: wrapping arc dyn blockdevice hides writability.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "flush_default_impl_is_noop_ok",
+        "path": "tests/readonly_wrapper.rs",
+        "line": 73
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: flush default impl is noop ok.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "inner_borrow_does_not_consume_wrapper",
+        "path": "tests/readonly_wrapper.rs",
+        "line": 80
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: inner borrow does not consume wrapper.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "into_inner_round_trips_and_recovers_writability",
+        "path": "tests/readonly_wrapper.rs",
+        "line": 93
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: into inner round trips and recovers writability.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_only_wrapper_is_send_sync",
+        "path": "tests/readonly_wrapper.rs",
+        "line": 104
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read only wrapper is send sync.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_writes_land_on_parent_at_offset",
+        "path": "tests/slice_rw.rs",
+        "line": 59
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice writes land on parent at offset.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_write_past_length_returns_out_of_bounds",
+        "path": "tests/slice_rw.rs",
+        "line": 82
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice write past length returns out of bounds.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_write_through_readonly_parent_returns_readonly",
+        "path": "tests/slice_rw.rs",
+        "line": 97
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice write through readonly parent returns readonly.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_flush_propagates_to_parent",
+        "path": "tests/slice_rw.rs",
+        "line": 106
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice flush propagates to parent.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_read_past_length_returns_short_read",
+        "path": "tests/slice_rw.rs",
+        "line": 116
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice read past length returns short read.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "slice_reader_nested_in_owned_slice_rebases_correctly",
+        "path": "tests/slice_rw.rs",
+        "line": 131
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: slice reader nested in owned slice rebases correctly.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_is_send_sync",
+        "path": "tests/slice_rw.rs",
+        "line": 151
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice is send sync.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "owned_rw_slice_write_offset_overflow_is_out_of_bounds",
+        "path": "tests/slice_rw.rs",
+        "line": 157
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: owned rw slice write offset overflow is out of bounds.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_to_end_over_file_device_matches_original_bytes",
+        "path": "tests/stream_integration.rs",
+        "line": 29
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read to end over file device matches original bytes.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_then_read_returns_expected_window",
+        "path": "tests/stream_integration.rs",
+        "line": 46
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek then read returns expected window.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "seek_from_end_lands_before_size",
+        "path": "tests/stream_integration.rs",
+        "line": 70
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: seek from end lands before size.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "streamer_works_through_arc_dyn_blockread",
+        "path": "tests/stream_integration.rs",
+        "line": 86
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: streamer works through arc dyn blockread.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "read_to_end_on_empty_file_yields_zero_bytes",
+        "path": "tests/stream_integration.rs",
+        "line": 98
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: read to end on empty file yields zero bytes.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "io_copy_streams_full_contents",
+        "path": "tests/stream_integration.rs",
+        "line": 110
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: io copy streams full contents.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "position_advances_as_chunks_are_read",
+        "path": "tests/stream_integration.rs",
+        "line": 123
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: position advances as chunks are read.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    },
+    {
+      "source": {
+        "name": "into_inner_returns_underlying_file_device",
+        "path": "tests/stream_integration.rs",
+        "line": 138
+      },
+      "kind": "test",
+      "decision": "keep",
+      "contract": "Block-device byte ranges, I/O errors, cache coherence and ownership: into inner returns underlying file device.",
+      "owner": "rust-fs-core",
+      "layer": "filesystem integration / disposable images",
+      "replacement": null,
+      "reason": "The implementation-owning repository already owns this contract; retain its coverage without reproducing the driver matrix in CBM.",
+      "origin": "upstream-inherited",
+      "configuration": "as declared by crate target/features"
+    }
+  ],
+  "totals": {
+    "test": 180,
+    "rustdoc": 1
+  },
+  "decisions": {
+    "keep": 181
+  }
+}
