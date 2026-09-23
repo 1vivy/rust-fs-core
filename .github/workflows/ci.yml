@@ -20,9 +20,70 @@ jobs:
           toolchain: 1.95.0
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+      - name: verify packaged output-budget script
+        shell: bash
+        run: |
+          files="$(cargo package --locked --list)"
+          grep -Fqx 'scripts/output-budget.sh' <<<"$files" || {
+            echo 'package omits scripts/output-budget.sh' >&2
+            exit 1
+          }
       - run: cargo build --locked --all-targets
-      - run: cargo test --locked --all-targets
+      # AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP ACKNOWLEDGES A REAL GAP.
+      # tests/device_node_size.rs covers the Linux device-size probe's
+      # success path with a loop device, and losetup needs root, which
+      # this runner is not. Without this the test FAILS rather than
+      # skipping quietly -- libtest discards a passing test's output, so
+      # a printed "skipped" line reaches nobody.
+      #
+      # What is still covered on this runner: the probe's FAILURE path,
+      # via /dev/zero, which needs no privileges. What is not: the
+      # success path, i.e. BLKGETSIZE64 returning a real size. macOS
+      # covers its own equivalent in full, unprivileged, via hdiutil.
+      #
+      # To close this rather than acknowledge it, run the suite as root.
+      # EXPECT_OVERFLOW_CHECKS ARMS THE ONE CHECK A TEXT SCAN CANNOT DO.
+      # This run has no `--release`, so overflow-checks are on, and it is
+      # what makes every arithmetic test in this crate mean anything.
+      # Measured: a temporary `black_box(250u8) + black_box(10u8)`
+      # panicked under `cargo test --locked` and passed under `cargo test
+      # --locked --release`.
+      #
+      # The variable tells `overflow_checks::the_build_the_gate_asked_to
+      # _check_does_check` in src/lib.rs that THIS is the run that must
+      # trap an overflow -- asking the build directly rather than
+      # inferring it from which spellings of "disabled" happen to be
+      # absent from Cargo.toml. It is declared here rather than inline as
+      # `VAR=1 cargo test` because this job also runs on windows-latest,
+      # where that prefix is a PowerShell syntax error.
+      #
+      # Do not add `--release` to this run, and do not drop the variable:
+      # tests/ci_profile.rs reads this file and fails if no `cargo test`
+      # in it runs without `--release` while setting this. See #90.
+      - name: test (quiet, budgeted, with an executed-test floor)
+        shell: bash
+        run: |
+          bash scripts/tier.sh "test (debug)" debug 750 50000 -- cargo test --locked --all-targets
+          bash scripts/test-floor.sh debug 330
+        env:
+          AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP: "1"
+          EXPECT_OVERFLOW_CHECKS: "1"
+      - name: keep the full test transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tier-logs-test-${{ matrix.os }}
+          path: tmp/logs/
+          if-no-files-found: warn
+          retention-days: 7
       - run: cargo clippy --locked --all-targets -- -D warnings
+      # `cargo doc` EXITS 0 ON WARNINGS, so an unresolved intra-doc link
+      # reaches main unseen unless warnings are denied here. Two did (#88).
+      # Declared through `env:` rather than an inline `VAR=... cargo doc`
+      # because this job also runs on windows-latest.
+      - run: cargo doc --no-deps --locked
+        env:
+          RUSTDOCFLAGS: "-D warnings"
   fmt:
     name: fmt
     runs-on: ubuntu-latest
@@ -33,6 +94,14 @@ jobs:
           toolchain: 1.95.0
           components: rustfmt
       - run: cargo fmt --check
+      - name: the one required check stands for every job
+        run: scripts/ci-gate.sh
+      - name: the agent guide carries the shared block
+        # AGENTS.md embeds agent-core, byte-identical with every sibling. This
+        # runs the script directly rather than through `chore lint`, because
+        # CI here does not install chore -- a guard wired only into a task
+        # nothing runs is a guard that reports protection it is not providing.
+        run: scripts/agents-core-check.sh
   coverage:
     name: coverage
     runs-on: ubuntu-latest
@@ -44,5 +113,59 @@ jobs:
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
-      - name: coverage (fail under 90%)
-        run: cargo llvm-cov --fail-under-lines 90
+      # THE SAME ACKNOWLEDGEMENT AS THE `test` JOB, and it has to be
+      # here rather than inherited: this job runs the suite too, under
+      # llvm-cov, and it is not root either. Without it
+      # tests/device_node_size.rs fails here while `test` passes, which
+      # is what happened. `tests/ci_acknowledges_the_privilege_gap.rs`
+      # now fails if a job runs the suite without saying this.
+      - name: coverage (quiet, budgeted, fail under 90%)
+        shell: bash
+        run: |
+          bash scripts/tier.sh coverage coverage 800 60000 -- cargo llvm-cov --html --output-dir target/llvm-cov --fail-under-lines 90
+          bash scripts/test-floor.sh coverage 330
+        env:
+          AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP: "1"
+      - name: keep the coverage transcript and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-evidence
+          path: |
+            tmp/logs/
+            target/llvm-cov/html/
+          if-no-files-found: warn
+          retention-days: 14
+
+
+  ci-ok:
+    name: ci-ok
+    # THE ONE REQUIRED CHECK (#154). Branch protection used to name five
+    # contexts by hand -- `fmt`, `coverage` and the three `test / <os>`
+    # matrix legs. Requiring this gate instead means a runner can be added
+    # to the matrix, or `coverage` renamed, or a job split in two, without
+    # leaving a required check that never reports -- which GitHub reads as
+    # permanently pending, with enforce_admins on and nothing to point at.
+    # It is also the only shape in which a job-level `if:` is safe.
+    #
+    # It runs no tests itself, deliberately: it is a claim about the other
+    # jobs, so it must not be able to pass work of its own off as theirs.
+    # That is also why tests/ci_acknowledges_the_privilege_gap.rs does not
+    # ask it for AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP -- it never runs the
+    # suite, so it has no privilege gap to acknowledge.
+    if: always()
+    needs: [test, fmt, coverage]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job ran and succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          bad="$(echo "$NEEDS" | jq -r '[to_entries[] | select(.value.result != "success") | .key] | join(", ")')"
+          if [ -n "$bad" ]; then
+            echo "::error::not green: $bad (failed, cancelled or skipped)"
+            exit 1
+          fi
+          echo "all required jobs succeeded"

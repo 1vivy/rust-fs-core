@@ -26,6 +26,30 @@ chore_min_version: 0.6.0
 # differs from rust-blk-probe, whose single binary lets its `artifact` name a
 # file: this crate produces libfs_core.a AND include/fs_core.h, so there is
 # no single path to name.
+#
+# QUIET TEST TIERS, WITH MEASURED BUDGETS AND EXECUTED-TEST FLOORS.
+#
+# Each tier keeps its complete transcript in tmp/logs/, prints one verdict on
+# success, prints the tail on failure, and exits 65 when a passing run exceeds
+# either budget. `chore test -- --verbose` or AM_FS_CORE_VERBOSE=1 streams the
+# transcript without lifting the budget.
+#
+# Measured from a clean Linux checkout on 2026-09-21. Debug produced 557 lines
+# / 31,250 bytes and executed 365 tests; the 750-line / 50,000-byte ceiling
+# leaves room for cold-build and platform variation, while the floor of 330
+# catches a tier that silently stops running a material part of the suite.
+# Release uses the same selection and measured the same 557 lines / 31,295
+# bytes after its cold LTO build. Coverage measured 575 lines / 32,607 bytes
+# and executed the same 374 tests as the post-change debug run:
+#
+#   tier       measured locally       budget           floor
+#   debug      557 / 31,250 bytes      750 / 50,000     330
+#   release    557 / 31,295 bytes      750 / 50,000     330
+#   coverage   575 / 32,607 bytes      800 / 60,000     330
+#
+# scripts/output-budget.sh is the one canonical neutral family source. See
+# docs/output-budget.md; consumers invoke it through their pinned
+# ../rust-fs-core sibling and own their adapters, budgets, floors and artifacts.
 vars:
   TRIPLE: aarch64-apple-darwin
   LIBNAME: fs_core
@@ -50,6 +74,37 @@ tasks:
       - Cargo.toml
       - 'src/**/*.rs'
       - 'include/*.h'
+      # THE GUARD IS PART OF THIS TASK, SO IT IS PART OF THE FINGERPRINT.
+      #
+      # The first command below runs
+      # tests/header_names_the_built_library.rs, and neither that file
+      # nor this one was a source -- so editing the guard left the task
+      # up to date and the guard did not run. Measured on the sibling
+      # this task is shared with: force its body to `false`, change
+      # nothing else, and `chore staticlib` prints "task: staticlib is
+      # up to date" and executes nothing.
+      #
+      # A check whose result nothing re-reads, in the step that decides
+      # what ships. chores.yml is here for the same reason: the command
+      # list, the artefact paths and the guard's invocation all live in
+      # this file, and a change to any of them changes the task.
+      #
+      # THE FILE THE TASK RUNS, NOT THE DIRECTORY IT LIVES IN. The
+      # sibling closed this with 'tests/**/*.rs', which fingerprints
+      # every file in tests/ while `cmds:` runs exactly one target -- so
+      # editing an unrelated test re-runs the whole task including the
+      # cross-target release build it could not have affected. That is
+      # rust-img-vhdx#85, and copying the fix verbatim reproduces it.
+      #
+      # DO NOT ANSWER EITHER BY DROPPING THE ENTRY. The rule is that
+      # `sources:` names what the task READS -- so if a second `--test`
+      # target is ever added below, its file belongs here beside this
+      # one.
+      # `the_staticlib_task_fingerprints_the_tests_it_runs_and_no_others`
+      # in tests/header_names_the_built_library.rs refuses both
+      # directions.
+      - 'tests/header_names_the_built_library.rs'
+      - chores.yml
 
     # Templated, which is fine here where it is not fine above: UpToDate
     # renders these before expanding them, and every entry is an exact path
@@ -60,6 +115,25 @@ tasks:
       - '{{.OUT}}/include/{{.LIBNAME}}.h'
 
     cmds:
+      # THE HEADER CHECK IS THE TEST, NOT A SECOND COPY OF IT.
+      #
+      # This was a shell fragment that grepped the header and compared
+      # what it found against `lib{{.LIBNAME}}.a` -- a value derived
+      # from the same hand-maintained LIBNAME variable it was checking.
+      # A LIBNAME/Cargo.toml drift, which is precisely what it existed
+      # to catch, passed it silently: rename `[lib] name` and cargo
+      # builds a different artefact while the guard compares LIBNAME
+      # against itself and agrees. A check whose two sides come from one
+      # source cannot fail.
+      #
+      # tests/header_names_the_built_library.rs derives the expected
+      # name from Cargo.toml's `[lib] name` -- the thing that actually
+      # decides the artefact -- with a real TOML parser rather than a
+      # line scan. Running it here means one implementation instead of
+      # two, and the one that is already exercised by CI.
+      #
+      # It stays FIRST so a mismatch costs no release build.
+      - 'cargo test --locked --test header_names_the_built_library'
       # Idempotent: rustup answers "up to date" without touching the network
       # when the target is already installed. It runs here rather than in the
       # consumer because the triple is ours.
@@ -79,6 +153,7 @@ tasks:
     # This exists so the CI gate can be reproduced locally. If the two
     # ever differ, this is the copy that is wrong.
     cmds:
+      - scripts/agents-core-check.sh
       - cargo fmt --check
       - cargo clippy --locked --all-targets -- -D warnings
 
@@ -86,9 +161,29 @@ tasks:
     desc: Debug build
     cmds: ['cargo build']
 
+  test:debug:
+    desc: Debug-profile suite, including every target
+    cmds:
+      - 'AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP=1 EXPECT_OVERFLOW_CHECKS=1 bash scripts/tier.sh "test (debug)" debug 750 50000 -- cargo test --locked --all-targets'
+      - 'bash scripts/test-floor.sh debug 330'
+
+  test:release:
+    desc: Release-profile suite, including every target
+    cmds:
+      - 'AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP=1 bash scripts/tier.sh "test (release)" release 750 50000 -- cargo test --locked --release --all-targets'
+      - 'bash scripts/test-floor.sh release 330'
+
   test:
-    desc: Test suite
-    cmds: ['cargo test']
+    desc: Debug and release test tiers
+    cmds:
+      - task: test:debug
+      - task: test:release
+
+  coverage:
+    desc: Instrumented suite with the same 90% line-coverage gate as CI
+    cmds:
+      - 'AM_FS_CORE_ALLOW_UNPRIVILEGED_SKIP=1 bash scripts/tier.sh coverage coverage 800 60000 -- cargo llvm-cov --html --output-dir target/llvm-cov --fail-under-lines 90'
+      - 'bash scripts/test-floor.sh coverage 330'
 
   clean:
     desc: Remove this crate's cargo output
@@ -118,3 +213,16 @@ tasks:
       - 'cd "{{.OUT}}" && pwd -P'
     vars:
       OUT: 'dist'
+
+  check:ci-gate:
+    desc: The one required check stands for every job in ci.yml
+    # A chore task naming a script, and nothing else -- the script is what can
+    # be tested, reviewed and run without chore at all.
+    #
+    # This was tests/ci_aggregate_gate.rs. It was the wrong container twice
+    # over: it parses a YAML file and compares strings, exercising nothing this
+    # crate ships, and as a cargo test it counted towards the executed-test
+    # floor the gate itself enforces -- so the suite could satisfy its floor
+    # partly by checking its own CI config.
+    cmds:
+      - scripts/ci-gate.sh

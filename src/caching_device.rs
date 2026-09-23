@@ -4,7 +4,7 @@
 
 use crate::block::{BlockDevice, BlockRead};
 use crate::error::Result;
-use std::collections::VecDeque;
+use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread::ThreadId;
 
@@ -35,7 +35,7 @@ pub const MAX_BLOCK_SIZE: u64 = 64 * 1024 * 1024;
 /// the writable half only when the caller had one to give:
 /// [`CachingDevice::new`] for a device that can be written,
 /// [`CachingDevice::read_only`] for one that cannot. A write to a cache
-/// built the second way is [`Error::ReadOnly`], which is what the
+/// built the second way is [`crate::Error::ReadOnly`], which is what the
 /// underlying device would have said.
 pub struct CachingDevice {
     inner: Arc<dyn BlockRead>,
@@ -72,11 +72,259 @@ pub struct CachingDevice {
     fetched: Condvar,
 }
 
+/// One cached block, and its neighbours in recency order.
+///
+/// `newer`/`older` are indices into [`Lru::slots`], not pointers, so
+/// the list is intrusive without being unsafe. A slot's index is stable
+/// for as long as the node lives, which is what lets the index map
+/// point at it.
+struct Node {
+    block_start: u64,
+    data: Arc<Vec<u8>>,
+    /// Toward the head: more recently used. `None` at the head.
+    newer: Option<usize>,
+    /// Toward the tail: less recently used. `None` at the tail.
+    older: Option<usize>,
+}
+
+/// The cached blocks, in recency order, with O(1) lookup AND O(1)
+/// promotion.
+///
+/// # Why not a `VecDeque` any more
+///
+/// It was one, and a hit cost `iter().position(...)` -- a linear scan
+/// comparing offsets -- followed by `VecDeque::remove(pos)`, which
+/// shifts every element on the shorter side of `pos` to close the gap.
+/// Both halves are linear in the number of entries, so the cache got
+/// slower the larger it was asked to be. Measured on this crate under
+/// `--release`, working set equal to capacity so the steady state is
+/// ~100% hits, with a `CountingDevice` underneath proving no device
+/// traffic at all (`device_reads = 0` at every capacity, so the whole
+/// difference is the cache's own bookkeeping):
+///
+/// ```text
+/// capacity   us/read   vs capacity 8
+///        8    0.0157             1x
+///       64    0.0319           2.0x
+///      512    0.1924          12.3x
+///     4096    1.3306            85x
+/// ```
+///
+/// A cached read at capacity 4096 cost 85 times what the same cached
+/// read cost at capacity 8, and 8x more capacity from 512 to 4096 cost
+/// 6.9x more per read -- linear, which is what `capacity/2` comparisons
+/// plus `capacity/2` tuple moves predicts.
+///
+/// The capacities that matter are already past the knee, which is what
+/// ruled out the other candidate fix of documenting a ceiling:
+/// `am-fs-erofs` defaults to 512 metadata blocks, and one 3 MiB file
+/// read there touches 768 blocks -- about a millisecond of pure
+/// scanning to deliver bytes already in memory.
+///
+/// # Why not a `HashMap` alone
+///
+/// A map fixes the lookup and leaves the promotion: the entry still has
+/// to move to the head of a recency order, and in a `VecDeque` that is
+/// still `remove` plus `push_front`, still O(n), and it invalidates
+/// every index the map is holding. The recency order has to be a linked
+/// list for the promotion to be O(1), and then the map indexes into it.
+struct Lru {
+    /// Slab. `None` is a free slot, kept rather than compacted so live
+    /// indices stay valid.
+    slots: Vec<Option<Node>>,
+    /// Slots to reuse before growing `slots`.
+    free: Vec<usize>,
+    index: HashMap<u64, usize>,
+    /// Most recently used.
+    newest: Option<usize>,
+    /// Least recently used: the eviction end.
+    oldest: Option<usize>,
+}
+
+impl Lru {
+    fn with_capacity(capacity: usize) -> Self {
+        Lru {
+            slots: Vec::with_capacity(capacity),
+            free: Vec::new(),
+            index: HashMap::with_capacity(capacity),
+            newest: None,
+            oldest: None,
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.index.len()
+    }
+
+    /// Take `i` out of the recency order, leaving the node in its slot.
+    fn unlink(&mut self, i: usize) {
+        let (newer, older) = {
+            let n = self.slots[i].as_ref().expect("unlink of a free slot");
+            (n.newer, n.older)
+        };
+        match newer {
+            Some(j) => self.slots[j].as_mut().expect("newer is live").older = older,
+            None => self.newest = older,
+        }
+        match older {
+            Some(j) => self.slots[j].as_mut().expect("older is live").newer = newer,
+            None => self.oldest = newer,
+        }
+        let n = self.slots[i].as_mut().expect("unlink of a free slot");
+        n.newer = None;
+        n.older = None;
+    }
+
+    /// Put `i` at the head of the recency order. It must not be linked.
+    fn link_newest(&mut self, i: usize) {
+        let old_head = self.newest;
+        {
+            let n = self.slots[i].as_mut().expect("link of a free slot");
+            n.newer = None;
+            n.older = old_head;
+        }
+        if let Some(j) = old_head {
+            self.slots[j].as_mut().expect("head is live").newer = Some(i);
+        } else {
+            self.oldest = Some(i);
+        }
+        self.newest = Some(i);
+    }
+
+    /// The block's data, promoted to most-recently-used. Two hash
+    /// lookups and a constant number of pointer writes, whatever the
+    /// capacity.
+    fn get(&mut self, block_start: u64) -> Option<Arc<Vec<u8>>> {
+        let i = *self.index.get(&block_start)?;
+        let data = self.slots[i]
+            .as_ref()
+            .expect("indexed slot is live")
+            .data
+            .clone();
+        if self.newest != Some(i) {
+            self.unlink(i);
+            self.link_newest(i);
+        }
+        Some(data)
+    }
+
+    /// Drop one block if it is held. Returns whether it was.
+    fn remove(&mut self, block_start: u64) -> bool {
+        let Some(i) = self.index.remove(&block_start) else {
+            return false;
+        };
+        self.unlink(i);
+        self.slots[i] = None;
+        self.free.push(i);
+        true
+    }
+
+    /// Insert at the head, evicting the least recently used first if
+    /// the cache is already at `capacity`.
+    ///
+    /// EVICT-THEN-INSERT UNCONDITIONALLY, which is the sequence the
+    /// `VecDeque` version used (`pop_back` under `len() >= capacity`,
+    /// then `push_front`). It matters at `capacity == 0`, where both
+    /// spellings leave exactly one entry held rather than none: a
+    /// behaviour worth preserving deliberately rather than changing
+    /// while moving house.
+    fn insert(&mut self, block_start: u64, data: Arc<Vec<u8>>, capacity: usize) {
+        // A RE-INSERT REPLACES RATHER THAN DUPLICATING. No caller does
+        // this today -- `block()` consults `get` under the same lock
+        // immediately before -- but a second slot for one block would
+        // leave the first linked in the recency list and unreachable
+        // through the index: a leak that also makes the list longer
+        // than the index, which is the kind of drift that shows up
+        // later as an eviction of something still held.
+        self.remove(block_start);
+        if self.len() >= capacity {
+            if let Some(oldest) = self.oldest {
+                let victim = self.slots[oldest]
+                    .as_ref()
+                    .expect("oldest is live")
+                    .block_start;
+                self.remove(victim);
+            }
+        }
+        let node = Node {
+            block_start,
+            data,
+            newer: None,
+            older: None,
+        };
+        let i = match self.free.pop() {
+            Some(i) => {
+                self.slots[i] = Some(node);
+                i
+            }
+            None => {
+                self.slots.push(Some(node));
+                self.slots.len() - 1
+            }
+        };
+        self.index.insert(block_start, i);
+        self.link_newest(i);
+    }
+
+    fn clear(&mut self) {
+        self.slots.clear();
+        self.free.clear();
+        self.index.clear();
+        self.newest = None;
+        self.oldest = None;
+    }
+
+    /// Drop every block for which `keep` is false.
+    ///
+    /// Linear in the number of entries, like the `retain` it replaces,
+    /// and deliberately so: this runs per WRITE, not per read, and the
+    /// blocks to drop have to be found by looking at all of them.
+    fn retain_blocks(&mut self, keep: impl Fn(u64) -> bool) {
+        let doomed: Vec<u64> = self.index.keys().copied().filter(|b| !keep(*b)).collect();
+        for b in doomed {
+            self.remove(b);
+        }
+    }
+
+    /// Most-recently-used first. Tests only: the recency ORDER is the
+    /// thing a linked list can get wrong in ways a hit rate cannot see.
+    #[cfg(test)]
+    fn recency_order(&self) -> Vec<u64> {
+        let mut out = Vec::with_capacity(self.len());
+        let mut cur = self.newest;
+        while let Some(i) = cur {
+            let n = self.slots[i].as_ref().expect("live");
+            out.push(n.block_start);
+            cur = n.older;
+        }
+        out
+    }
+
+    /// Least-recently-used first, walked the other way. Tests only, and
+    /// the reason it exists is that a singly-consistent list passes
+    /// every forward walk while being broken backwards -- which is the
+    /// half eviction uses.
+    #[cfg(test)]
+    fn recency_order_reversed(&self) -> Vec<u64> {
+        let mut out = Vec::with_capacity(self.len());
+        let mut cur = self.oldest;
+        while let Some(i) = cur {
+            let n = self.slots[i].as_ref().expect("live");
+            out.push(n.block_start);
+            cur = n.newer;
+        }
+        out
+    }
+}
+
 struct CacheState {
     /// Fixed-capacity LRU; head is most-recently used. The capacity
     /// itself is [`CachingDevice::capacity`] — it never changes, so it
     /// is not kept under the lock.
-    entries: VecDeque<(u64, Arc<Vec<u8>>)>,
+    ///
+    /// An index plus an intrusive recency list rather than a
+    /// `VecDeque`: see [`Lru`] for the measurement that decided it.
+    entries: Lru,
     hits: u64,
     misses: u64,
     /// Bumped by every invalidation. A miss records it before it lets go
@@ -96,9 +344,12 @@ struct CacheState {
     /// the number of blocks being fetched concurrently, not the number
     /// cached, so it is small in exactly the cases the scan would matter.
     ///
-    /// EACH FETCH CARRIES THE THREAD DOING IT, so that a thread can tell
-    /// somebody else's fetch from its own. Waiting for another thread is
-    /// the point; waiting for itself is a deadlock. See `block`.
+    /// EACH FETCH CARRIES THE THREAD DOING IT, so that a thread can ask
+    /// whether it is holding a fetch of its own before it waits for
+    /// anybody else's. Waiting for another thread is the point; waiting
+    /// while holding a fetch is how a cycle forms, whether the block
+    /// waited on is this thread's own or two links away round a ring of
+    /// re-entrant threads. See `block`.
     in_flight: Vec<(u64, ThreadId)>,
 }
 
@@ -116,6 +367,9 @@ impl CachingDevice {
     /// `block_size` must be non-zero and no larger than
     /// [`MAX_BLOCK_SIZE`]; see [`CachingDevice::read_only`] for why that
     /// is enforced at first use rather than here.
+    ///
+    /// `capacity` is documented on [`CachingDevice::read_only`]; it means
+    /// the same here, including that `0` still caches one block.
     pub fn new(inner: Arc<dyn BlockDevice>, block_size: u64, capacity: usize) -> Arc<Self> {
         Arc::new(Self {
             inner: inner.clone(),
@@ -123,7 +377,7 @@ impl CachingDevice {
             block_size,
             capacity,
             state: Mutex::new(CacheState {
-                entries: VecDeque::with_capacity(capacity),
+                entries: Lru::with_capacity(capacity),
                 hits: 0,
                 misses: 0,
                 generation: 0,
@@ -143,6 +397,48 @@ impl CachingDevice {
     /// `Arc<Self>`, not `Result` — so a block size outside that range is
     /// refused by every read and every write instead, with an error
     /// naming the offending size.
+    ///
+    /// `capacity` is a count of **blocks**, not bytes: at most that many
+    /// entries of up to `block_size` bytes each are held, so the memory
+    /// bound is their product and is the caller's to choose. There is no
+    /// ceiling; promotion and eviction are O(1) at any capacity.
+    ///
+    /// **`capacity = 0` does not disable the cache.** It holds one entry,
+    /// so a repeated single-block read is still served as a hit, and two
+    /// alternating blocks thrash it (#124). The behaviour is deliberate
+    /// and pinned, not an oversight. A caller that wants no cache at zero
+    /// should not construct one, and this constructor cannot do that for
+    /// it because it returns `Arc<Self>`:
+    ///
+    /// ```text
+    /// let dev: Arc<dyn BlockRead> = if blocks == 0 {
+    ///     dev
+    /// } else {
+    ///     CachingDevice::read_only(dev, block_size, blocks)
+    /// };
+    /// ```
+    ///
+    /// ```
+    /// # use std::sync::Arc;
+    /// # use fs_core::{BlockRead, CachingDevice, CountingDevice};
+    /// # struct Mem(Vec<u8>);
+    /// # impl BlockRead for Mem {
+    /// #     fn read_at(&self, offset: u64, buf: &mut [u8]) -> fs_core::Result<()> {
+    /// #         let o = offset as usize;
+    /// #         buf.copy_from_slice(&self.0[o..o + buf.len()]);
+    /// #         Ok(())
+    /// #     }
+    /// #     fn size_bytes(&self) -> u64 { self.0.len() as u64 }
+    /// # }
+    /// let device = Arc::new(CountingDevice::new(Arc::new(Mem(vec![7; 512 * 8]))));
+    /// let cache = CachingDevice::read_only(device.clone(), 512, 0);
+    /// let mut buf = [0u8; 16];
+    /// cache.read_at(0, &mut buf).unwrap();
+    /// cache.read_at(8, &mut buf).unwrap();
+    /// // A capacity of zero served the second read from the cache.
+    /// assert_eq!(device.reads(), 1);
+    /// assert_eq!(cache.stats(), (1, 1));
+    /// ```
     pub fn read_only(inner: Arc<dyn BlockRead>, block_size: u64, capacity: usize) -> Arc<Self> {
         Arc::new(Self {
             inner,
@@ -150,7 +446,7 @@ impl CachingDevice {
             block_size,
             capacity,
             state: Mutex::new(CacheState {
-                entries: VecDeque::with_capacity(capacity),
+                entries: Lru::with_capacity(capacity),
                 hits: 0,
                 misses: 0,
                 generation: 0,
@@ -160,6 +456,49 @@ impl CachingDevice {
         })
     }
 
+    /// `(hits, misses)`, in that order.
+    ///
+    /// Both count **block lookups inside the cache**, not reads of this
+    /// device and not reads of `inner` (#123):
+    ///
+    /// - a hit is a block served from the cache, including one that was
+    ///   waiting on another thread's fetch of the same block;
+    /// - a miss is a block this cache fetched from `inner`, so `misses` is
+    ///   the number of fetches the cache itself made.
+    ///
+    /// A read the cache declines to serve moves **neither** counter. A
+    /// read reaching past the end of `inner`, and a read spanning enough
+    /// blocks that caching it would sweep the cache (more than one block,
+    /// and more than half of `capacity`), go straight to `inner`; an empty
+    /// read, or one refused for its block size, touches nothing. So `hits + misses` is not the number of `read_at` calls,
+    /// `misses` is a lower bound on the reads `inner` saw, and
+    /// `hits / (hits + misses)` is a rate over the reads the cache served,
+    /// which leaves out every read it chose not to. To count what reached
+    /// the device, put a [`CountingDevice`](crate::CountingDevice) under
+    /// the cache.
+    ///
+    /// ```
+    /// # use std::sync::Arc;
+    /// # use fs_core::{BlockRead, CachingDevice, CountingDevice};
+    /// # struct Mem(Vec<u8>);
+    /// # impl BlockRead for Mem {
+    /// #     fn read_at(&self, offset: u64, buf: &mut [u8]) -> fs_core::Result<()> {
+    /// #         let o = offset as usize;
+    /// #         buf.copy_from_slice(&self.0[o..o + buf.len()]);
+    /// #         Ok(())
+    /// #     }
+    /// #     fn size_bytes(&self) -> u64 { self.0.len() as u64 }
+    /// # }
+    /// let device = Arc::new(CountingDevice::new(Arc::new(Mem(vec![7; 512 * 32]))));
+    /// let cache = CachingDevice::read_only(device.clone(), 512, 8);
+    /// let mut one = [0u8; 16];
+    /// cache.read_at(0, &mut one).unwrap(); // miss: fetched
+    /// cache.read_at(8, &mut one).unwrap(); // hit
+    /// let mut big = vec![0u8; 512 * 6];
+    /// cache.read_at(0, &mut big).unwrap(); // 6 blocks > capacity / 2: bypassed
+    /// assert_eq!(cache.stats(), (1, 1));
+    /// assert_eq!(device.reads(), 2); // the bypassed read is not a miss
+    /// ```
     pub fn stats(&self) -> (u64, u64) {
         let s = self.state.lock().unwrap();
         (s.hits, s.misses)
@@ -172,9 +511,9 @@ impl CachingDevice {
     }
 
     fn invalidate_range(state: &mut CacheState, start: u64, end: u64, block_size: u64) {
-        state.entries.retain(|(off, _)| {
+        state.entries.retain_blocks(|off| {
             let block_end = off.saturating_add(block_size);
-            *off >= end || block_end <= start
+            off >= end || block_end <= start
         });
         // BUMPED WHETHER OR NOT ANYTHING WAS DROPPED. The counter is not a
         // record of what this sweep removed; it is a fence a concurrent
@@ -271,17 +610,43 @@ impl CachingDevice {
         // correct against a spurious wake, an invalidation that landed
         // in the meantime, and a fetch that failed and left nothing.
         //
-        // A THREAD NEVER WAITS FOR ITS OWN FETCH, WHICH IS WHY THE
-        // MARKER CARRIES AN OWNER.
+        // A THREAD THAT IS ALREADY FETCHING SOMETHING NEVER WAITS,
+        // WHOEVER OWNS THE BLOCK IT WANTS. WHICH IS WHY THE MARKER
+        // CARRIES AN OWNER.
         //
         // A device whose `read_at` reads back through the cache that
-        // wraps it re-enters this method for the block it is itself
-        // fetching. Waiting there would be waiting for a fetch this
-        // thread is holding up: a deadlock. So a thread that finds its
-        // own id against the block falls through and reads the device
-        // again -- the redundant read this commit removes for every
-        // other caller, which is the right answer for the one caller
-        // that cannot be served any other way.
+        // wraps it re-enters this method while its own fetch is still
+        // outstanding. The narrow case is that it asks for the very
+        // block it is fetching, and waiting there is waiting for a
+        // fetch this thread is holding up: a deadlock. That shape is
+        // visible from the owner alone.
+        //
+        // THE GENERAL CASE IS NOT, and asking only "is this fetch
+        // mine" cannot see it. Thread A fetches X and re-enters for Y;
+        // thread B fetches Y and re-enters for X. Neither finds its own
+        // id against the block it wants, so both wait -- each for a
+        // fetch the other is holding up, on a condition variable only a
+        // completed fetch can signal. Nothing completes. It is the same
+        // deadlock one link longer, and there is no length at which
+        // comparing the owner to the caller starts to notice.
+        //
+        // So the question is not "is this fetch mine" but "am I holding
+        // one at all". A cycle needs every thread in it to be both
+        // holding a fetch and waiting for another one; a thread holding
+        // nothing cannot be waited on, so it cannot be in a cycle. A
+        // thread therefore waits only when it holds nothing, and that
+        // removes every cycle rather than the shortest one. It needs no
+        // wait-for graph and no new state to do it -- only a wider
+        // question asked of the list already being scanned.
+        //
+        // WHAT IT COSTS is a redundant device read in one narrow case:
+        // a re-entrant thread that wants a block another thread is
+        // fetching, where waiting would in fact have been safe. That is
+        // the same trade the self case already made, and only a device
+        // that re-enters can reach it. For every other caller nothing
+        // changes at all, because a thread holds a fetch here only
+        // while it is inside `read_at` on the device, and a device that
+        // cannot call back in leaves this false on every ordinary miss.
         //
         // THE GUARD IS HERE BECAUSE OF WHAT A HANG COSTS, not because
         // re-entrancy is expected. It is not: no device in this crate
@@ -300,18 +665,17 @@ impl CachingDevice {
         let generation_at_miss = {
             let mut s = self.state.lock().unwrap();
             loop {
-                if let Some(pos) = s.entries.iter().position(|(o, _)| *o == block_start) {
-                    let entry = s.entries.remove(pos).expect("position just found it");
-                    let data = entry.1.clone();
-                    s.entries.push_front(entry);
+                if let Some(data) = s.entries.get(block_start) {
                     s.hits += 1;
                     return Ok(data);
                 }
                 let mine = std::thread::current().id();
-                if s.in_flight
-                    .iter()
-                    .any(|(o, owner)| *o == block_start && *owner != mine)
-                {
+                // Any fetch of this thread's, not just one of this
+                // block: holding any of them is what makes waiting
+                // unsafe. See the cycle argument above.
+                let holding_a_fetch = s.in_flight.iter().any(|(_, owner)| *owner == mine);
+                let being_fetched = s.in_flight.iter().any(|(o, _)| *o == block_start);
+                if being_fetched && !holding_a_fetch {
                     // Counted as neither yet. It becomes a hit when the
                     // fetch it is waiting for lands, and a miss if that
                     // fetch fails and this thread has to do it instead
@@ -360,17 +724,11 @@ impl CachingDevice {
             // it a re-entrant read puts two entries in for one block,
             // which is the defect this commit exists to remove, in a
             // new place.
-            if let Some(pos) = s.entries.iter().position(|(o, _)| *o == block_start) {
-                let entry = s.entries.remove(pos).expect("position just found it");
-                let held = entry.1.clone();
-                s.entries.push_front(entry);
+            if let Some(held) = s.entries.get(block_start) {
                 return Ok(held);
             }
             if s.generation == generation_at_miss {
-                if s.entries.len() >= self.capacity {
-                    s.entries.pop_back();
-                }
-                s.entries.push_front((block_start, data.clone()));
+                s.entries.insert(block_start, data.clone(), self.capacity);
             }
         }
         Ok(data)
@@ -496,6 +854,17 @@ impl BlockRead for CachingDevice {
         // the device, and the blocks between them cover everything up to
         // that bound. So this is the device breaking its promise being
         // caught rather than believed.
+        //
+        // `BlockDevice::set_len` IS THE ONE SANCTIONED WAY THAT NUMBER
+        // MOVES, and this is still the right answer when a read races
+        // one. `set_len` sweeps the blocks its new length makes short,
+        // either side of the device call, so a read that is not
+        // concurrent with one can never land here; a read that IS
+        // concurrent with one may, and an error naming what it got beats
+        // a short buffer reported as success. The defect this catches is
+        // a `set_len` that moved the length and swept nothing, which is
+        // exactly how a growth API re-creates #70 -- see this type's
+        // `set_len`.
         if done != buf.len() {
             return Err(crate::error::Error::ShortRead {
                 offset,
@@ -518,6 +887,12 @@ impl BlockDevice for CachingDevice {
     /// costs a re-read, while keeping them past a write that half
     /// succeeded serves bytes the device no longer holds.
     ///
+    /// That applies to a write the device refused, not to one this type
+    /// refused on the device's behalf. A write rejected because there is
+    /// no writable half, or because the block size is unusable, never
+    /// reaches the device and so cannot have staled anything — those
+    /// return above both sweeps and leave the cache exactly as it was.
+    ///
     /// # AND IT IS INVALIDATED TWICE, ONCE EITHER SIDE OF THE DEVICE
     ///
     /// One sweep before the write is not enough. Between it and the
@@ -535,6 +910,30 @@ impl BlockDevice for CachingDevice {
     /// counter agrees with it and only the second sweep drops what it
     /// inserted.
     fn write_at(&self, offset: u64, buf: &[u8]) -> Result<()> {
+        // NO WRITABLE HALF IS ANSWERED FIRST, ABOVE EVERY OTHER REFUSAL.
+        //
+        // This used to sit below the block-size check and below the first
+        // sweep, and both positions were wrong for their own reason.
+        //
+        // Below the block-size check, a read-only cache whose block size
+        // came off a damaged disk answered a write with `Error::Custom`
+        // rather than the `Error::ReadOnly` this type's own documentation
+        // promises. That is not a cosmetic difference in the variant name:
+        // `stream.rs` maps `ReadOnly` to `PermissionDenied` and `Custom` to
+        // `io::Error::other`, so a caller branching on `PermissionDenied`
+        // to say "this volume is read-only" reported an uncategorised
+        // failure instead — on a read-only mount of a damaged image, which
+        // is exactly the configuration where a bad block size turns up.
+        //
+        // Below the first sweep, every refused write emptied the region it
+        // was refused for, so a read-only cache paid a re-read for a write
+        // that could never have staled anything.
+        //
+        // The block-size check does NOT move down to meet it. See below.
+        let Some(writable) = self.writable.as_ref() else {
+            return Err(crate::error::Error::ReadOnly);
+        };
+
         // BEFORE EITHER SWEEP, AND THAT ORDERING IS LOAD-BEARING.
         //
         // A sweep cannot be done correctly with a block size of zero:
@@ -545,19 +944,18 @@ impl BlockDevice for CachingDevice {
         // afterwards would therefore do the one thing this type must never
         // do, on the way to reporting an error.
         //
-        // Refusing here is also the only position that cannot break the
-        // two-sweep guarantee above. The invariant that guarantee rests on
-        // is "if the device was written, both sweeps ran" — and returning
-        // at this point means the device is never reached, so nothing was
-        // written and nothing needs sweeping. An early return anywhere
-        // below would skip the second sweep after a write that may have
-        // landed, which is exactly the window that fix closed.
+        // Refusing here is also a position that cannot break the two-sweep
+        // guarantee above. The invariant that guarantee rests on is "if the
+        // device was written, both sweeps ran" — and returning at this point
+        // means the device is never reached, so nothing was written and
+        // nothing needs sweeping. An early return anywhere BELOW would skip
+        // the second sweep after a write that may have landed, which is
+        // exactly the window that fix closed. The read-only refusal above
+        // is safe for the same reason and no other: it too returns before
+        // either sweep and touches neither the cache nor the device.
         self.check_block_size()?;
         let end = offset.saturating_add(buf.len() as u64);
         self.invalidate_for_write(offset, end);
-        let Some(writable) = self.writable.as_ref() else {
-            return Err(crate::error::Error::ReadOnly);
-        };
         let result = writable.write_at(offset, buf);
         // Unconditionally, for the same reason the first sweep is
         // unconditional: a write that failed may still have landed.
@@ -577,6 +975,111 @@ impl BlockDevice for CachingDevice {
 
     fn is_writable(&self) -> bool {
         self.writable.as_ref().is_some_and(|w| w.is_writable())
+    }
+
+    /// # THE CACHE'S VIEW HAS TO MOVE WITH THE DEVICE, OR THIS IS #70
+    ///
+    /// `size_bytes` here forwards to the device, so the NUMBER follows a
+    /// grow for free. The entries do not. `block()` clamps every fetch to
+    /// `size_bytes()` at the moment it runs — "the last block of a device
+    /// is often short", as its own comment says — so an entry fetched
+    /// before the grow ends where the device used to. Leave it in place
+    /// and a later read across the old end is served from it, runs out of
+    /// bytes, and comes back `ShortRead` for a region the device now
+    /// holds perfectly well.
+    ///
+    /// Measured, with this method forwarding to the device and sweeping
+    /// nothing: a 6000-byte file behind a 4096-byte cache, the short
+    /// block warmed, `set_len(8192)`, then one read across the old end:
+    ///
+    /// ```text
+    /// ShortRead { offset: 5000, want: 3000, got: 1000 }
+    /// ```
+    ///
+    /// That is rust-fs-core#70's signature exactly — the grow succeeded,
+    /// the file and the reported size agreed, and only a LATER CACHED
+    /// READ found the hole. It is why the growth API is a change to this
+    /// file as much as to `block.rs`.
+    ///
+    /// # FROM `min(old, new)` UPWARDS, WHICHEVER WAY THE LENGTH WENT
+    ///
+    /// A grow only makes the block STRADDLING the old end wrong, and that
+    /// block starts below the old end — so the sweep has to begin at the
+    /// old length, not at the first block boundary above it, and
+    /// `invalidate_range` drops any block whose end passes `start`.
+    ///
+    /// A shrink makes everything from the new length up wrong instead.
+    /// Taking the smaller of the two covers both without asking which
+    /// happened, and the upper bound is `u64::MAX` because "the rest of
+    /// the device" is what changed in either case.
+    ///
+    /// # `min` RATHER THAN `old`, AND NO TEST HERE CAN TELL THEM APART
+    ///
+    /// Said plainly because the alternative is a comment claiming a
+    /// guarantee nobody measured. Sweeping from the OLD length alone
+    /// leaves the blocks between the two lengths cached after a shrink,
+    /// and that suite is EXIT=0 -- every arm in `tests/device_growth.rs`
+    /// passes with `min` removed.
+    ///
+    /// It passes because nothing can read those entries. `read_at`
+    /// forwards any read whose end passes `size_bytes()` straight to the
+    /// device rather than serving it from blocks, so while the device is
+    /// short they are unreachable; and a later grow sweeps from the
+    /// smaller of ITS two lengths, which is the shrunk one, so they are
+    /// dropped before they become reachable again.
+    ///
+    /// `min` ships anyway, and not for symmetry. The argument above rests
+    /// on a bound in a DIFFERENT METHOD holding forever -- an entry that
+    /// is stale but currently unreadable is one guard away from being
+    /// stale and readable. This is the cheaper half of the invariant to
+    /// state correctly, so it is stated correctly here rather than
+    /// derived from somewhere else on every future read of this file.
+    ///
+    /// # AND IT IS SWEPT TWICE, ONCE EITHER SIDE, FOR `write_at`'S REASON
+    ///
+    /// One sweep before is not enough. Between it and the device call
+    /// landing, a concurrent [`CachingDevice::read_at`] can miss, fetch a
+    /// block clamped to the OLD length, and insert it behind the sweep.
+    /// The second sweep closes that window, together with the generation
+    /// check on the miss path. Each covers what the other cannot, in the
+    /// same way and for the same reason `write_at` documents at length.
+    ///
+    /// Both run whether or not the device call succeeded, also for
+    /// `write_at`'s reason: a `set_len` that failed may still have moved
+    /// the file, and dropping entries needlessly costs a re-read while
+    /// keeping stale ones serves bytes the device no longer has.
+    ///
+    /// # THE TWO REFUSALS ABOVE THE SWEEPS
+    ///
+    /// No writable half, and an unusable block size — the same pair
+    /// `write_at` refuses on, in the same order, and above both sweeps
+    /// for the same two reasons. `Error::ReadOnly` rather than
+    /// `Error::Custom` when there is nothing to write, because
+    /// [`crate::stream`] maps only the first to `PermissionDenied`; and
+    /// the block-size check above the sweeps because `invalidate_range`
+    /// cannot sweep correctly with a block size of zero, so sweeping
+    /// first and refusing after would do the one thing this type must
+    /// never do on the way to reporting an error. Neither refusal reaches
+    /// the device, so neither can have staled anything.
+    fn set_len(&self, new_len: u64) -> Result<()> {
+        let Some(writable) = self.writable.as_ref() else {
+            return Err(crate::error::Error::ReadOnly);
+        };
+        self.check_block_size()?;
+
+        // The lower of the two lengths: below it nothing changed, at or
+        // above it everything may have.
+        let from = self.inner.size_bytes().min(new_len);
+        self.invalidate_for_write(from, u64::MAX);
+        let result = writable.set_len(new_len);
+        self.invalidate_for_write(from, u64::MAX);
+        result
+    }
+
+    /// The writable half's answer, or `false` when there is no writable
+    /// half — a cache cannot grow a device it can only read.
+    fn can_grow(&self) -> bool {
+        self.writable.as_ref().is_some_and(|w| w.can_grow())
     }
 }
 
@@ -819,5 +1322,152 @@ mod tests {
         // And flushing is not an error: a caller that flushes
         // defensively must not fail on a volume it never wrote.
         assert!(cache.flush().is_ok());
+    }
+}
+
+#[cfg(test)]
+mod lru_tests {
+    use super::*;
+
+    fn block(n: u8) -> Arc<Vec<u8>> {
+        Arc::new(vec![n; 4])
+    }
+
+    /// The list has to be walkable BOTH WAYS and agree with itself.
+    ///
+    /// A singly-consistent list passes every forward walk while being
+    /// broken backwards -- and backwards is the half eviction uses, so
+    /// the failure would surface as evicting the wrong block rather
+    /// than as anything a hit rate could show.
+    fn assert_consistent(lru: &Lru) {
+        let forward = lru.recency_order();
+        let mut backward = lru.recency_order_reversed();
+        backward.reverse();
+        assert_eq!(
+            forward, backward,
+            "the recency list disagrees with itself walked the other way"
+        );
+        assert_eq!(
+            forward.len(),
+            lru.len(),
+            "the list holds {} nodes and the index {} -- they have drifted",
+            forward.len(),
+            lru.len()
+        );
+    }
+
+    #[test]
+    fn a_hit_promotes_to_most_recently_used() {
+        let mut lru = Lru::with_capacity(4);
+        for i in 0..4u64 {
+            lru.insert(i * 100, block(i as u8), 4);
+        }
+        assert_eq!(lru.recency_order(), vec![300, 200, 100, 0]);
+        assert!(lru.get(100).is_some());
+        assert_eq!(lru.recency_order(), vec![100, 300, 200, 0]);
+        assert_consistent(&lru);
+
+        // Promoting what is already newest must not corrupt the ends.
+        assert!(lru.get(100).is_some());
+        assert_eq!(lru.recency_order(), vec![100, 300, 200, 0]);
+        assert_consistent(&lru);
+
+        // Nor must promoting the oldest.
+        assert!(lru.get(0).is_some());
+        assert_eq!(lru.recency_order(), vec![0, 100, 300, 200]);
+        assert_consistent(&lru);
+    }
+
+    #[test]
+    fn the_least_recently_used_is_what_gets_evicted() {
+        let mut lru = Lru::with_capacity(3);
+        for i in 0..3u64 {
+            lru.insert(i * 100, block(i as u8), 3);
+        }
+        // Touch the oldest so it is no longer the victim.
+        assert!(lru.get(0).is_some());
+        lru.insert(999, block(9), 3);
+        assert_eq!(lru.len(), 3);
+        assert_eq!(
+            lru.recency_order(),
+            vec![999, 0, 200],
+            "100 was least recently used and is the one that should be gone"
+        );
+        assert!(lru.get(100).is_none());
+        assert_consistent(&lru);
+    }
+
+    #[test]
+    fn evicted_slots_are_reused_rather_than_growing_the_slab() {
+        let mut lru = Lru::with_capacity(2);
+        for i in 0..20u64 {
+            lru.insert(i, block(i as u8), 2);
+            assert_consistent(&lru);
+        }
+        assert_eq!(lru.len(), 2);
+        assert!(
+            lru.slots.len() <= 3,
+            "twenty inserts at capacity 2 left {} slots: freed slots are not being \
+             reused, so the slab grows without bound",
+            lru.slots.len()
+        );
+    }
+
+    #[test]
+    fn a_re_insert_replaces_and_does_not_leave_the_old_node_linked() {
+        let mut lru = Lru::with_capacity(4);
+        lru.insert(10, block(1), 4);
+        lru.insert(20, block(2), 4);
+        lru.insert(10, block(3), 4);
+        assert_eq!(lru.len(), 1 + 1, "one entry per block, not one per insert");
+        assert_eq!(lru.recency_order(), vec![10, 20]);
+        assert_eq!(
+            lru.get(10).as_deref().map(|v| v[0]),
+            Some(3),
+            "the newer data wins"
+        );
+        assert_consistent(&lru);
+    }
+
+    #[test]
+    fn removing_and_retaining_keep_the_list_consistent() {
+        let mut lru = Lru::with_capacity(8);
+        for i in 0..8u64 {
+            lru.insert(i, block(i as u8), 8);
+        }
+        assert!(lru.remove(0), "the tail");
+        assert_consistent(&lru);
+        assert!(lru.remove(7), "the head");
+        assert_consistent(&lru);
+        assert!(lru.remove(4), "the middle");
+        assert_consistent(&lru);
+        assert!(!lru.remove(4), "already gone");
+
+        lru.retain_blocks(|b| b % 2 == 0);
+        assert_consistent(&lru);
+        assert_eq!(lru.recency_order(), vec![6, 2]);
+
+        lru.clear();
+        assert_eq!(lru.len(), 0);
+        assert!(lru.recency_order().is_empty());
+        assert_consistent(&lru);
+    }
+
+    /// `capacity == 0` holds exactly one entry, not none.
+    ///
+    /// That is what the `VecDeque` version did -- `pop_back` on an
+    /// empty deque is a no-op, then `push_front` -- and it is
+    /// preserved deliberately rather than changed while moving house.
+    /// Pinned so the next person to touch `insert` finds out from a
+    /// test rather than from a caller.
+    #[test]
+    fn capacity_zero_behaves_as_it_did_before() {
+        let mut lru = Lru::with_capacity(0);
+        lru.insert(1, block(1), 0);
+        assert_eq!(lru.len(), 1);
+        lru.insert(2, block(2), 0);
+        assert_eq!(lru.len(), 1);
+        assert_eq!(lru.recency_order(), vec![2]);
+        assert_consistent(&lru);
     }
 }
